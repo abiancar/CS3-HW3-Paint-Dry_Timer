@@ -8,14 +8,14 @@ using namespace std;
 class TimeCode {
     public:
         TimeCode(unsigned int hr = 0, unsigned int min = 0, long long unsigned int sec = 0);
-        TimeCode(const TimeCode& tc);
+        TimeCode(const TimeCode& tc); // signature for copy constructor
         ~TimeCode(){};
         
         void SetHours(unsigned int hours); 
         void SetMinutes(unsigned int minutes);
         void SetSeconds(unsigned int seconds);
 
-        void reset() {this->t = 0;};
+        void reset();
     
         unsigned int GetHours() const;
         unsigned int GetMinutes() const;
