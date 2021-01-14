@@ -1,10 +1,8 @@
 
 #include <iostream>
 #include <assert.h>
-using namespace std;
-
 #include "TimeCode.h"
-
+using namespace std;
 
 
 void TestComponentsToSeconds(){
@@ -26,15 +24,12 @@ void TestComponentsToSeconds(){
 	cout << "PASSED!" << endl << endl;
 }
 
-
 void TestDefaultConstructor(){
 	cout << "Testing Default Constructor" << endl;
 	TimeCode tc;
-	
 	//cout << "Testing ToString()" << endl;
 	//cout << "tc: " << tc.ToString() << endl;
 	assert(tc.ToString() == "0:0:0");
-	
 	cout << "PASSED!" << endl << endl;
 }
 
@@ -65,11 +60,13 @@ void TestComponentConstructor(){
 	//cout << "tc: " << tc.ToString() << endl;
 	assert(tc3.ToString() == "0:1:7");
 
-	// More tests go here!
+	TimeCode tc4 = TimeCode(48, 0, 25);
+	//cout << "Testing ToString()" << endl;
+	//cout << "tc: " << tc.ToString() << endl;
+	assert(tc4.ToString() == "48:0:25");
 	
 	cout << "PASSED!" << endl << endl;
 }
-
 
 void TestGetComponents(){
 	cout << "Testing GetComponents" << endl;
@@ -86,9 +83,14 @@ void TestGetComponents(){
 	TimeCode tc2 = TimeCode(0, 1, 7);
 	tc2.GetComponents(h, m, s);
 	assert(h == 0 && m == 1 && s == 7);
+
+	TimeCode tc3 = TimeCode(48, 0, 55);
+	tc3.GetComponents(h, m, s);
+	assert(h == 48 && m == 0 && s == 55);
 	
 	cout << "PASSED!" << endl << endl;
 }
+
 void TestGetHours(){
 	cout << "Testing GetHours()" << endl;
 	TimeCode tc = TimeCode(0, 0, 0);
@@ -109,8 +111,6 @@ void TestGetHours(){
 	
 	cout << "PASSED!" << endl << endl;
 }
-
-// Test GetMinutes
 
 void TestGetMinutes(){
 	cout << "Testing GetMinutes()" << endl;
@@ -133,8 +133,6 @@ void TestGetMinutes(){
 	cout << "PASSED!" << endl << endl;
 }
 
-
-
 void TestSubtract(){
 	cout << "Testing Subtract" << endl;
 	TimeCode tc1 = TimeCode(1, 0, 0);
@@ -151,19 +149,30 @@ void TestSubtract(){
 	catch(const invalid_argument& e){
 		// just keep doing more tests
 	}
+	TimeCode tc6 = TimeCode(48, 5, 0);
+	TimeCode tc7 = TimeCode(0, 20, 0);
+	TimeCode tc8 = tc6 - tc6;
+	assert(tc8.ToString() == "0:0:0");
 
-	// more tests
+	tc8 = tc6 - tc7;
+	assert(tc8.ToString() == "47:45:0");
 	
 	cout << "PASSED!" << endl << endl;
 }
+
 void TestAdd(){
 	cout << "Testing Add" << endl;
 	TimeCode tc1 = TimeCode(1, 0, 0);
 	TimeCode tc2 = TimeCode(0, 50, 0);
 	TimeCode tc3 = tc1 + tc2;
 	assert(tc3.ToString() == "1:50:0");
-	
-	
+	TimeCode tc4 = TimeCode(7887, 25, 52);
+	TimeCode tc5 = TimeCode(0, 50, 0);
+	TimeCode tc6 = tc4 + tc5;
+	assert(tc6.ToString() == "7888:15:52");
+	TimeCode tc7 = TimeCode(1, 0, 0);
+	TimeCode tc8 = TimeCode(0, 50, 0);
+	TimeCode tc9 = tc1 + tc2;
 	cout << "PASSED!" << endl << endl;
 }
 
@@ -172,14 +181,22 @@ void TestMultiply(){
 	TimeCode tc1 = TimeCode(1, 0, 0);
 	TimeCode tc2 = tc1 * 2;
 	assert(tc2.ToString() == "2:0:0");
-
-
 	tc2 = tc1 * 2.5;
 	assert(tc2.ToString() == "2:30:0");	
-	cout << "PASSED!" << endl << endl;
-
 	TimeCode tc3 = tc1 * 0;
 	assert(tc3.ToString() == "0:0:0");	
+	tc1.reset();
+	tc1.SetMinutes(25);
+	tc1 = tc1 * 0.5;
+	assert(tc1.ToString() == "0:12:30");
+	try{
+		TimeCode tc5 = tc1 * (-5) ;
+		cout << "tc5: " << tc5.ToString() << endl;
+		assert(false);
+	}
+	catch(const invalid_argument& e){
+		// just keep doing more tests
+	}
 	cout << "PASSED!" << endl << endl;
 }
 
@@ -194,7 +211,14 @@ void TestDivide(){
 		assert(false);
 	}
 	catch(const invalid_argument& e){
-		cout << e.what() << endl;
+		// just keep doing more tests
+	}
+	try{
+		TimeCode tc5 = tc1 / -1 ;
+		cout << "tc5: " << tc5.ToString() << endl;
+		assert(false);
+	}
+	catch(const invalid_argument& e){
 		// just keep doing more tests
 	}
 
@@ -222,11 +246,24 @@ void TestSetSeconds(){
 	//cout << "tc: " << tc.ToString() << endl;
 	tc3.SetSeconds(52);
 	assert(tc3.ToString() == "24:34:52");
-
-	// More tests go here!
 	
+	try{
+		tc3.reset();
+		tc3.SetSeconds(60);
+		assert(false);
+	}
+	catch(const invalid_argument& e){
+	}
+	try{
+		tc3.reset();
+		tc3.SetSeconds(70);
+		assert(false);
+	}
+	catch(const invalid_argument& e){
+	}	
 	cout << "PASSED!" << endl << endl;
 }
+
 void TestSetMinutes(){
 	cout << "Testing Set Minutes" << endl;
 	TimeCode tc = TimeCode(0, 0, 0);
@@ -247,7 +284,20 @@ void TestSetMinutes(){
 	tc3.SetMinutes(52);
 	assert(tc3.ToString() == "24:52:6");
 
-	// More tests go here!
+	try{
+		tc3.reset();
+		tc3.SetMinutes(60);
+		assert(false);
+	}
+	catch(const invalid_argument& e){
+	}
+	try{
+		tc3.reset();
+		tc3.SetMinutes(70);
+		assert(false);
+	}
+	catch(const invalid_argument& e){
+	}	
 	
 	cout << "PASSED!" << endl << endl;
 }
@@ -287,6 +337,7 @@ void TestReset(){
 }
 
 void TestComparisonOperators(){
+	cout << "Testing TestComparisonOperators () " << endl;
 	TimeCode tc1;
 	TimeCode tc2 = TimeCode(1,9,7);
 	
@@ -298,18 +349,37 @@ void TestComparisonOperators(){
 	assert((tc1 != tc2) == true);	
 	
 	
-	tc1 = tc2;
+	tc1 = tc2; // both are equal test
 	assert((tc1 < tc2) == false);
 	assert((tc2 > tc1) == false);
 	assert((tc2 == tc1) == true );
 	assert((tc1 >= tc2) == true);
 	assert((tc2 <= tc1) == true);
 	assert((tc1 != tc2) == false);
+
+	TimeCode tc3 = TimeCode(1512451,10,12);
+	TimeCode tc4 = TimeCode(124,14,9);
+	assert((tc4 < tc3) == true);
+	assert((tc3 > tc4) == true);
+	assert((tc3 == tc4) == false);
+	assert((tc3 >= tc4) == true);
+	assert((tc4 <= tc3) == true);
+	assert((tc4 != tc3) == true);
+
 	cout << "PASSED!" << endl << endl;  
 }
 
-
-// Many More Tests...
+void TestGetTimeCodeAsSeconds(){
+	cout << "Testing GetTimeCodeAsSeconds() " << endl;
+	TimeCode t = TimeCode(294,49,7);
+	assert(t.GetTimeCodeAsSeconds() == 1061347);
+	t.reset();
+	assert(t.GetTimeCodeAsSeconds() == 0);
+	t.reset();
+	t = TimeCode(10,10,10);
+	assert(t.GetTimeCodeAsSeconds() == 36610);
+	cout << "PASSED!" << endl << endl;
+}
 
 	
 int main(){
@@ -329,6 +399,7 @@ int main(){
 	TestDefaultConstructor();
 	TestComponentConstructor();
 	TestSubtract();
+	TestGetTimeCodeAsSeconds();
 		
 	cout << "PASSED ALL TESTS!!!" << endl;
 	return 0;
