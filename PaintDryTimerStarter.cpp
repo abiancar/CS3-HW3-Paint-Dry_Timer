@@ -1,6 +1,3 @@
-
-
-
 #include <ctime> // for time(0)
 #include <iostream> // for cin and cout
 #include <cmath> // for M_PI and others
@@ -32,8 +29,6 @@ long long int get_time_remaining(DryingSnapShot dss){
 	// cout << "END " << end << endl;
 	// cout << "TIME ELAPSED " << timeElapsed << endl;
 	// cout << "TIME REMAINING " << timeRemaining << endl << endl;
-
-
 	return timeRemaining;
 }
 
@@ -44,7 +39,7 @@ string drying_snap_shot_to_string(DryingSnapShot dss){
 	long long int time_remaining = get_time_remaining(dss);
 	string string_time = to_string(time_remaining);
 	TimeCode t = TimeCode(0,0,time_remaining);
-	return "BATCH: " + dss.name + "(takes " + t.ToString() + " to dry) ";
+	return "BATCH-" + dss.name + "(takes " + t.ToString() + " to dry) ";
 }
 
 double get_sphere_sa(double rad){
@@ -57,114 +52,103 @@ TimeCode *compute_time_code(double surfaceArea){
 	return t;
 }
 
-void tests(){
-	// get_time_remaining
-	DryingSnapShot dss;
-	dss.startTime = time(0);
-	TimeCode tc = TimeCode(0, 0, 7);
-	dss.timeToDry = &tc;
-	long long int ans = get_time_remaining(dss);
-	assert(ans > 6 && ans < 8);
-
-	DryingSnapShot dss2;
-	dss2.startTime = time(0);
-	tc = TimeCode(0, 0, 15);
-	dss2.timeToDry = &tc;
-	ans = get_time_remaining(dss);
-	assert(ans > 14 && ans < 16);
-
-	DryingSnapShot dss3;
-	dss3.startTime = time(0);
-	tc = TimeCode(0, 1, 15);
-	dss3.timeToDry = &tc;
-	ans = get_time_remaining(dss);
-	assert(ans > 74 && ans < 76);
-
-	// add more tests here
-
-
-	// get_sphere_sa
-	double sa = get_sphere_sa(2.0);
-	assert (50.2654 < sa && sa < 50.2655);
-	// add more tests here
-
-	// compute_time_code
-	TimeCode *tc2 = compute_time_code(1.0);
-	cout << "tc: " << tc.GetTimeCodeAsSeconds() << endl;
-	assert(tc2->GetTimeCodeAsSeconds() == 1);
-	delete tc2;
-
-	// add more tests here
-	cout << "ALL TESTS PASSED!" << endl;
-
-}
-
-
-
 int main(){
-	vector<DryingSnapShot> BatchVector;
-	char userResponse = 'p';
+	
+	vector<DryingSnapShot> dssList;
+	vector<DryingSnapShot> cleaner; //used to help arrange wet items
 
-	while (userResponse != 'q'){
-		int randID = rand();
-
-
-		// at the beginning of every loop, check if any of the batches have finished, remove them from BatchVectors
-		for (size_t i = 0; i < BatchVector.size(); i++){
-			DryingSnapShot curr = BatchVector.at(i);
-			if (get_time_remaining(curr) <= 0){
-				cout << "BELOW! " << endl;
-				for (size_t j = 0; j < BatchVector.size() ; j++){
-					cout << "AAA " << drying_snap_shot_to_string(BatchVector.at(j));
-				}
-				delete &BatchVector.at(i);
-				for (size_t j = 0; j < BatchVector.size() ; j++){
-					cout << "AAA " << drying_snap_shot_to_string(BatchVector.at(j));
-				}
-				BatchVector.erase(BatchVector.begin()+i);
+	cout << "Choose an option: (A)dd, (V)iew Current Items, (Q)uit: ";
+	
+	string userResponse = "p";
+	while(userResponse != "q"){
+	// at the beginning of every loop, check if any of the batches have finished, remove them from BatchVectors
+		
+		for (size_t i = 0; i < dssList.size(); i++){
+			DryingSnapShot curr = dssList.at(i);
+			if (get_time_remaining(curr) > 0){
+				cleaner.push_back(curr);
 			}
+			// delete curr.timeToDry;
+			// 	dssList.erase(dssList.begin()+i);
+			// 	i++;
+			// }
 		}
+		dssList.clear();
+		dssList = cleaner;
+		cleaner.clear();
+		if(userResponse == "v"){
+			for (size_t i = 0; i < dssList.size(); i++){
+				DryingSnapShot curr = dssList.at(i);		
+				cout << drying_snap_shot_to_string(curr) << endl;
+			}
+			cout << dssList.size() << " items being tracked.";
+		}
+		if(userResponse == "a"){
+			int randID = rand();
 
-		cin >> userResponse;
-		if(userResponse == 'a'){
-			int radius = 7; // 
-			cout << "radius: " << radius;
+			int radius = (rand() % 40) * 0.25; // set to 7  for testing purposes ie: till I squash this damn bug
+			cout << "radius: " << radius << endl;
 
 			DryingSnapShot tss; // create a Drying SnapShot called tss
 			tss.name = to_string(randID); // give it identifier
 			tss.startTime = time(0); //set its start time
 
 			// TimeCode tc = *compute_time_code(get_sphere_sa(rad));
-			TimeCode tc = TimeCode(0,0,radius); // amount of time till it dries
-			tss.timeToDry = &tc;
+			tss.timeToDry = new TimeCode(0,0,radius);
 
 			cout << tss.timeToDry->ToString() << endl;
 			TimeCode remainingTime = TimeCode(0,0,get_time_remaining(tss));
-			cout << "Batch-" << tss.name << "will dry in " << remainingTime.ToString() << endl << endl;
-			BatchVector.push_back(tss);
+			cout << "Batch-" << tss.name << "will dry in " << remainingTime.ToString() << endl;
+			dssList.push_back(tss);
 		}
-		else if(userResponse == 'v'){
-			for (size_t i = 0; i < BatchVector.size(); i++){
-				DryingSnapShot curr = BatchVector.at(i);
-				
-				//if this item should be removed
-				if (get_time_remaining(curr) <= 0){
-					cout << "BELOW ZERO";
-					for (size_t j = 0; j < BatchVector.size() ; j++){
-					cout << "AAA " << drying_snap_shot_to_string(BatchVector.at(j));
-					}
-					delete &BatchVector.at(i);
-					for (size_t j = 0; j < BatchVector.size() ; j++){
-					cout << "AAA " << drying_snap_shot_to_string(BatchVector.at(j));
-					}
-					BatchVector.erase(BatchVector.begin()+i);
-				}	
-				cout << "Batch-" <<curr.name << "time remaining: " << get_time_remaining(BatchVector.at(i)) <<endl;
-			}
-			cout << BatchVector.size() << " items being tracked" << endl << endl;
-		}
+		cin >> userResponse;
 	}
-
-	tests();
 	return 0;
 }
+
+
+
+	void tests(){
+
+	
+	// // get_time_remaining
+	// DryingSnapShot dss;
+	// dss.startTime = time(0);
+	// TimeCode tc = TimeCode(0, 0, 7);
+	// dss.timeToDry = &tc;
+	// long long int ans = get_time_remaining(dss);
+	// assert(ans > 6 && ans < 8);
+
+	// DryingSnapShot dss2;
+	// dss2.startTime = time(0);
+	// tc = TimeCode(0, 0, 15);
+	// dss2.timeToDry = &tc;
+	// ans = get_time_remaining(dss);
+	// assert(ans > 14 && ans < 16);
+
+	// DryingSnapShot dss3;
+	// dss3.startTime = time(0);
+	// tc = TimeCode(0, 1, 15);
+	// dss3.timeToDry = &tc;
+	// ans = get_time_remaining(dss);
+	// assert(ans > 74 && ans < 76);
+
+	// // add more tests here
+
+
+	// // get_sphere_sa
+	// double sa = get_sphere_sa(2.0);
+	// assert (50.2654 < sa && sa < 50.2655);
+	// // add more tests here
+
+	// // compute_time_code
+	// TimeCode *tc2 = compute_time_code(1.0);
+	// cout << "tc: " << tc.GetTimeCodeAsSeconds() << endl;
+	// assert(tc2->GetTimeCodeAsSeconds() == 1);
+	// delete tc2;
+
+	// add more tests here
+	// cout << "ALL TESTS PASSED!" << endl;
+
+
+	}	
